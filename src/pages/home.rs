@@ -1,5 +1,6 @@
 use yew::prelude::*;
 use crate::types::{Product, CartProduct};
+use crate::components::ProductCard;
 use crate::api;
 use anyhow::Error;
 use yew::format::Json;
@@ -59,17 +60,17 @@ impl Component for Home {
                     }
                 });
                 self.task = Some(api::get_products(handler));
-                return true
+                true
             }
             Msg::GetProductsSuccess(products) => {
                 self.state.products = products;
                 self.state.get_products_loaded = true;
-                return true
+                true
             }
             Msg::GetProductsError(error) => {
                 self.state.get_products_error = Some(error);
                 self.state.get_products_loaded = true;
-                return true
+                true
             }
             Msg::AddToCart(product_id) => {
                 let product = self
@@ -94,10 +95,9 @@ impl Component for Home {
                         quantity: 1
                     });
                 }
-                return true
+                true
             }
         }
-        true
     }
 
     fn change(&mut self, _:Self::Properties) -> ShouldRender {
@@ -112,12 +112,7 @@ impl Component for Home {
         .map(|product: &Product|{
             let product_id = product.id;
             html!{
-                <div>
-                    <img src={&product.image}/>
-                    <div>{&product.name}</div>
-                    <div>{"$"}{&product.price}</div>
-                    <button onclick=self.link.callback(move |_| Msg::AddToCart(product_id))>{"Add To Cart"}</button>
-                </div>
+                <ProductCard product={product} on_add_to_cart=self.link.callback(move |_| Msg::AddToCart(product_id))/>
             }
         }).collect();
 
@@ -135,10 +130,13 @@ impl Component for Home {
         else{
             html! {
                 <div>
-                <span>{format!("Cart Value: {:.2}", cart_value)}</span>
-                <span>{products}</span>
+                    <div class="navbar">
+                        <div class="navbar_title">{"RustMart"}</div>
+                        <div class="navbar_cart_value">{format!("Cart Value: {:.2}", cart_value)}</div>
+                    </div>
+                    <div class="product_card_list">{products}</div>
                 </div>
-            }
+            } 
         }
         
     }
